@@ -8,6 +8,7 @@ from random import randint
 from math import pi
 from time import sleep
 
+print 'testing github commit stuff'
 
 def team_rename(team_s):
 	if team_s == 'Arizona Cardinals':
