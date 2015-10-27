@@ -30,9 +30,9 @@ Variable list is printed by default.
 data_folder_loc = '../NFL/Data'
 model_folder_loc = '../NFL/Models'
 model_filename = 'Master_file_13_14.csv' 
-years = [2013, 2015]
+years = [2013, 2014]
 start_week = [1, 1]
-end_week = [17, 2]
+end_week = [17, 17]
 team_list = ['crd', 'atl', 'rav', 'buf', 'car', 'chi', 'cin', 'cle', 'dal', 'den', 'det','gnb', 
 'htx', 'clt', 'jax', 'kan', 'mia', 'min', 'nwe', 'nor', 'nyg', 'nyj', 'rai', 'phi', 'pit', 
 'sdg', 'sfo', 'sea', 'ram', 'tam', 'oti', 'was']
