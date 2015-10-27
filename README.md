@@ -3,8 +3,8 @@
 webscraping_main.py generates .csv files for easy analysis of NFL data. This is done by webscraping the data from Pro-Football-Reference and storing it in .json files. All the user has to do is edit the variables listed below the header. These are:
 
 ## Variables to specify
-- data_folder_loc: The folder location for your .json files
-- model_folder_loc: The folder location for your .csv file
+- data_folder_loc: The destination folder for your .json files
+- model_folder_loc: The destination folder for your .csv file
 - model_filename: The name of your .csv file
 - which years you want
 - start and ending weeks
