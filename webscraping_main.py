@@ -8,6 +8,39 @@ from random import randint
 from math import pi
 from time import sleep
 
+'''
+Webscrapes data for specified year(s) into .json files located in 'data_folder_loc' and 
+generates .csv file into 'model_folder_loc' location. 
+
+The webscraping has a 5-10 second delay per game to avoid spamming the website, so
+it takes some time to run.
+
+Each row is a matchup for a given week. Variables for home team begin with 'H_' and 
+variables for away team begin with 'A_'.
+
+Includes data for each current week for each variable, as well as year-to-date 
+values(exclusive) and yearly averages(except 2015). 
+
+Can also generate up-to-date 2015 results as long as they are on pro-football-reference. 
+
+Variable list is printed by default.
+'''
+
+#Change the following as desired
+data_folder_loc = '../NFL/Data'
+model_folder_loc = '../NFL/Models'
+model_filename = 'Master_file_13_14.csv' 
+years = [2013, 2015]
+start_week = [1, 1]
+end_week = [17, 2]
+team_list = ['crd', 'atl', 'rav', 'buf', 'car', 'chi', 'cin', 'cle', 'dal', 'den', 'det','gnb', 
+'htx', 'clt', 'jax', 'kan', 'mia', 'min', 'nwe', 'nor', 'nyg', 'nyj', 'rai', 'phi', 'pit', 
+'sdg', 'sfo', 'sea', 'ram', 'tam', 'oti', 'was']
+print_variables = True
+
+
+
+
 
 def team_rename(team_s):
 	if team_s == 'Arizona Cardinals':
@@ -577,8 +610,7 @@ def scrape_gamelog(team, year, max_week):
 					dict1[key].append(value)
 
 
-
-	with open('../NFL/Data/all_data_' + team + '_' + year + '.json', 'w') as game_file:
+	with open(os.path.join(data_folder_loc, data_name + team + '_' + year + '.json'), 'w') as game_file:
 		json.dump(dict1, game_file)		        	
 	return dict1
 
@@ -587,12 +619,12 @@ def create_row_data_train(home_game_data, away_team, Week, year, Model, measure,
 
 	away_str = team_rename(away_team)
 
-	if not os.path.isfile('../NFL/Data/all_data_' + away_str + '_' + year + '.json'):
+	if not os.path.isfile(os.path.join(data_folder_loc, data_name + away_str + '_' + year + '.json')):
 		print 'Webscraping game log for away team (with a short delay)'
 		scrape_gamelog(away_str, year, max_week)
 		sleep(randint(80,150) / 7.0 / pi)
 
-	away_file = open('../NFL/Data/all_data_' + away_str + '_' + year + '.json','r')
+	away_file = open(os.path.join(data_folder_loc, data_name + away_str + '_' + year + '.json'),'r')
 	away_game_data = json.load(away_file)
 
 
@@ -651,16 +683,6 @@ def create_row_data_train(home_game_data, away_team, Week, year, Model, measure,
 
 
 
-
-# master_variable_list = ['Q1', 'Q3', 'Q2', 'DTO', 'Q4', 'DNetPassYd', 'Vegas Line', 
-# 'DRushAtt', 'Home', 'Pen', 'DINT', 'FF', 'DPassYd', 'OTotalYd', 'Rec', 'DSackYd', 
-# 'D3rdAtt', 'OPassTD', 'Week', 'Over/Under', 'Opp', 'DRushTD', 'ToP', 'DRushYd', 
-# 'ORushAtt', 'Date', 'DTotalYd', 'PenYd', 'DDrives', 'O1stD', 'O4thConv', 'OPassComp',
-#  'ORushYd', 'OPassYd', 'OScores', 'ORushTD', 'DPassTD', 'OSack', 'OFumLost', 
-#  'O3rdConv', 'DScoresA', 'DPassComp', 'OTpts', 'O4thAtt', 'Fum', 'DTdsA', 'OT',
-#   'OTO', 'DPlays', 'D1stD', 'PtsS', 'DSack', 'O3rdAtt', 'D4thConv', 'D3rdConv', 
-#   'W/L', 'D4thAtt', 'DTdsS', 'DPassAtt', 'OINT', 'OSackYd', 'PtsA', 'OPassAtt',
-#    'OPlays', 'ODrives', 'OTds', 'ONetPassYd']
 master_variable_list_to_avg = ['Q1', 'Q3', 'Q2', 'DTO', 'Q4', 'DNetPassYd', 
 'DRushAtt', 'Pen', 'DINT', 'FF', 'DPassYd', 'OTotalYd', 'DSackYd', 
 'D3rdAtt', 'OPassTD', 'DRushTD', 'ToP', 'DRushYd', 
@@ -670,12 +692,6 @@ master_variable_list_to_avg = ['Q1', 'Q3', 'Q2', 'DTO', 'Q4', 'DNetPassYd',
   'OTO', 'DPlays', 'D1stD', 'PtsS', 'DSack', 'O3rdAtt', 'D4thConv', 'D3rdConv', 
   'D4thAtt', 'DTdsS', 'DPassAtt', 'OINT', 'OSackYd', 'PtsA', 'OPassAtt',
    'OPlays', 'ODrives', 'OTds', 'ONetPassYd']
-# print master_variable_list
-
-# master_variable_list = ['PtsS','PtsA','OPassYd']
-# master_variable_list_to_avg
-# master_variable_list_avg_ytd = ['WinP', 'LocWinP'] + master_variable_list
-# master_variable_list_avg_yr = ['WinP', 'LocWinP'] + master_variable_list
 
 
 master_variable_list = master_variable_list_to_avg
@@ -684,28 +700,33 @@ master_variable_list_avg_yr = ['WinP', 'LocWinP'] + master_variable_list
 
 
 variables = ['H_' + i for i in master_variable_list] + ['A_' + i for i in master_variable_list] + ['H_' + i + '_Avg_YTD' for i in master_variable_list_avg_ytd] + ['A_' + i + '_Avg_YTD' for i in master_variable_list_avg_ytd] + ['H_' + i + '_Avg_Yr' for i in master_variable_list_avg_yr] + ['A_' + i + '_Avg_Yr' for i in master_variable_list_avg_yr]
-print variables
+variables_15 = ['H_' + i for i in master_variable_list] + ['A_' + i for i in master_variable_list] + ['H_' + i + '_Avg_YTD' for i in master_variable_list_avg_ytd] + ['A_' + i + '_Avg_YTD' for i in master_variable_list_avg_ytd]
 
+if print_variables:
+	print variables
 
 header = ['Year', 'Week', 'Home', 'Away', 'Result', 'Vegas_Line', 'Over/Under'] + variables
-years = [2011, 2012, 2013, 2014]
-start_week = [1, 1, 1, 1]
-end_week = [17, 17, 17, 17]
-team_list = ['crd', 'atl', 'rav', 'buf', 'car', 'chi', 'cin', 'cle', 'dal', 'den', 'det','gnb', 
-'htx', 'clt', 'jax', 'kan', 'mia', 'min', 'nwe', 'nor', 'nyg', 'nyj', 'rai', 'phi', 'pit', 
-'sdg', 'sfo', 'sea', 'ram', 'tam', 'oti', 'was']
+header_15 = ['Year', 'Week', 'Home', 'Away', 'Result', 'Vegas_Line', 'Over/Under'] + variables_15
 
-model_file = '../NFL/Models/Master_file_11_14a.csv'
+
+model_file = os.path.join(model_folder_loc, model_filename)
 with open(model_file, 'wb') as myfile:
-    wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
-    wr.writerow(header)
-    for count, year in enumerate(years):
+	wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
+	if years != [2015]:
+		wr.writerow(header)
+	else:
+		wr.writerow(header_15)
+	for count, year in enumerate(years):
+		if year == 2015:
+			data_name = 'data_w' + str(end_week[-1]) + '_'
+		else:
+			data_name = 'all_data_'
 		for team in team_list:
-			if not os.path.isfile('../NFL/Data/all_data_' + team + '_' + str(year) + '.json'):
+			if not os.path.isfile(os.path.join(data_folder_loc, data_name + team + '_' + str(year) + '.json')):
 				print 'Webscraping game log for home team (with a short delay)'
 				scrape_gamelog(team, str(year), end_week[count])
 				sleep(randint(80,150) / 7.1 / pi)
-			with open('../NFL/Data/all_data_' + team + '_' + str(year) + '.json','r') as team_file:
+			with open(os.path.join(data_folder_loc, data_name + team + '_' + str(year) + '.json'),'r') as team_file:
 				team_data = json.load(team_file)
 				for week_num in range(start_week[count], end_week[count] + 1):
 					if week_num in team_data['Week'] and team_data['Home'][team_data['Week'].index(week_num)]: #if not a bye week and a home game
@@ -719,8 +740,12 @@ with open(model_file, 'wb') as myfile:
 							result = 0.5
 						else:
 							result = 0
-						row_data_single = create_row_data_train(team_data, away_team_name, week_num, str(year), master_variable_list, 'single game', end_week[count])
-						row_data_avg_ytd = create_row_data_train(team_data, away_team_name, week_num, str(year), master_variable_list_avg_ytd, 'avg_ytd', end_week[count])
-						row_data_avg_yr = create_row_data_train(team_data, away_team_name, week_num, str(year), master_variable_list_avg_yr, 'avg_yr', end_week[count])
-						wr.writerow([str(year), str(week_num), team, team_rename(away_team_name), result, vegas_index, over_under_index] + row_data_single + row_data_avg_ytd + row_data_avg_yr)
-
+						if year != 2015:
+							row_data_single = create_row_data_train(team_data, away_team_name, week_num, str(year), master_variable_list, 'single game', end_week[count])
+							row_data_avg_ytd = create_row_data_train(team_data, away_team_name, week_num, str(year), master_variable_list_avg_ytd, 'avg_ytd', end_week[count])
+							row_data_avg_yr = create_row_data_train(team_data, away_team_name, week_num, str(year), master_variable_list_avg_yr, 'avg_yr', end_week[count])
+							wr.writerow([str(year), str(week_num), team, team_rename(away_team_name), result, vegas_index, over_under_index] + row_data_single + row_data_avg_ytd + row_data_avg_yr)
+						else:
+							row_data_single = create_row_data_train(team_data, away_team_name, week_num, str(year), master_variable_list, 'single game', end_week[count])
+							row_data_avg_ytd = create_row_data_train(team_data, away_team_name, week_num, str(year), master_variable_list_avg_ytd, 'avg_ytd', end_week[count])
+							wr.writerow([str(year), str(week_num), team, team_rename(away_team_name), result, vegas_index, over_under_index] + row_data_single + row_data_avg_ytd)
